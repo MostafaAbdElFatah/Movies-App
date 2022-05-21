@@ -36,7 +36,7 @@
 		06246440283880AA00C312E2 /* MoviesListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0624643F283880AA00C312E2 /* MoviesListVC.swift */; };
 		062464422838815400C312E2 /* MoviesListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062464412838815400C312E2 /* MoviesListViewModel.swift */; };
 		0626678F283954190058FF7D /* ReachabilityProtocolMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0626678E283954190058FF7D /* ReachabilityProtocolMock.swift */; };
-		06266792283954D90058FF7D /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06266791283954D90058FF7D /* Reachability.swift */; };
+		06266792283954D90058FF7D /* ReachabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06266791283954D90058FF7D /* ReachabilityTests.swift */; };
 		062ABB432838DB3700108579 /* MoviesListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062ABB422838DB3700108579 /* MoviesListViewModelTests.swift */; };
 		062ABB452838DB9300108579 /* MoviesAPIsManagerProtocolMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062ABB442838DB9300108579 /* MoviesAPIsManagerProtocolMock.swift */; };
 		064002582838848300F38387 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064002572838848300F38387 /* State.swift */; };
@@ -46,6 +46,7 @@
 		067C33B228394238006CDE67 /* SQLManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067C33B128394238006CDE67 /* SQLManagerProtocol.swift */; };
 		067C33B5283944B2006CDE67 /* DBLManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067C33B4283944B2006CDE67 /* DBLManagerTests.swift */; };
 		067C33B728394519006CDE67 /* DBManagerProtocolMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 067C33B628394519006CDE67 /* DBManagerProtocolMock.swift */; };
+		06A053342839887400630088 /* movies.json in Resources */ = {isa = PBXBuildFile; fileRef = 060248802838992A003DD78E /* movies.json */; };
 		854DA7ADC0350BE410398EB1 /* Pods_MoviesApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A3122866FC70D63528481A /* Pods_MoviesApp.framework */; };
 		8D6C686DC6CD442FE20E1C72 /* Pods_MoviesAppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8C63E1313F02D1C5B78F15B /* Pods_MoviesAppTests.framework */; };
 		D54DE979F6EBE59495396FE1 /* Pods_MoviesApp_MoviesAppUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F758CE510BF9C3A56433A72A /* Pods_MoviesApp_MoviesAppUITests.framework */; };
@@ -103,7 +104,7 @@
 		0624643F283880AA00C312E2 /* MoviesListVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesListVC.swift; sourceTree = "<group>"; };
 		062464412838815400C312E2 /* MoviesListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesListViewModel.swift; sourceTree = "<group>"; };
 		0626678E283954190058FF7D /* ReachabilityProtocolMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachabilityProtocolMock.swift; sourceTree = "<group>"; };
-		06266791283954D90058FF7D /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
+		06266791283954D90058FF7D /* ReachabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReachabilityTests.swift; sourceTree = "<group>"; };
 		062ABB422838DB3700108579 /* MoviesListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesListViewModelTests.swift; sourceTree = "<group>"; };
 		062ABB442838DB9300108579 /* MoviesAPIsManagerProtocolMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviesAPIsManagerProtocolMock.swift; sourceTree = "<group>"; };
 		064002572838848300F38387 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
@@ -287,8 +288,8 @@
 		0624642028387EDD00C312E2 /* MoviesAppTests */ = {
 			isa = PBXGroup;
 			children = (
-				062667902839545B0058FF7D /* ReachabilityProtocol */,
 				067C33B32839449D006CDE67 /* DBManagerTests */,
+				062667902839545B0058FF7D /* ReachabilityTests */,
 				0602487D283898DB003DD78E /* MoviesAPIsManagerTests */,
 				062ABB412838DABE00108579 /* MoviesListViewModelTests */,
 				06143EBD2838E6F100B27E38 /* Extensions */,
@@ -365,13 +366,13 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		062667902839545B0058FF7D /* ReachabilityProtocol */ = {
+		062667902839545B0058FF7D /* ReachabilityTests */ = {
 			isa = PBXGroup;
 			children = (
-				06266791283954D90058FF7D /* Reachability.swift */,
+				06266791283954D90058FF7D /* ReachabilityTests.swift */,
 				0626678E283954190058FF7D /* ReachabilityProtocolMock.swift */,
 			);
-			path = ReachabilityProtocol;
+			path = ReachabilityTests;
 			sourceTree = "<group>";
 		};
 		062ABB412838DABE00108579 /* MoviesListViewModelTests */ = {
@@ -541,6 +542,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06A053342839887400630088 /* movies.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -696,7 +698,7 @@
 				062ABB452838DB9300108579 /* MoviesAPIsManagerProtocolMock.swift in Sources */,
 				067C33B728394519006CDE67 /* DBManagerProtocolMock.swift in Sources */,
 				067C33B5283944B2006CDE67 /* DBLManagerTests.swift in Sources */,
-				06266792283954D90058FF7D /* Reachability.swift in Sources */,
+				06266792283954D90058FF7D /* ReachabilityTests.swift in Sources */,
 				06143EBB2838E65000B27E38 /* MoviesGenerator.swift in Sources */,
 				0602488228389945003DD78E /* Bundle+unitTest.swift in Sources */,
 				060248842838997E003DD78E /* MoviesAPIsManagerTests.swift in Sources */,

@@ -7,7 +7,7 @@
 
 import XCTest
 
-class Reachability: XCTestCase {
+class ReachabilityTests: XCTestCase {
 
     
     var sut:ReachabilityProtocolMock!

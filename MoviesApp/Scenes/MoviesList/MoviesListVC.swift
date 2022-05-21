@@ -89,6 +89,7 @@ final class MoviesListVC: UIViewController {
     func bindNavigation() {
         viewModel.selectedPhoto.bind{ [weak self]  photo in
             guard let self = self else { return }
+            guard let photo = photo else { return }
             self.moveTo(photo: photo)
         }.disposed(by: disposeBag)
     }
