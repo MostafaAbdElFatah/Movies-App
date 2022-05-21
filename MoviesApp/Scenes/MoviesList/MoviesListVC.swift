@@ -7,13 +7,49 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 final class MoviesListVC: UIViewController {
 
     // MARK: - Public properties -
+    lazy var tableView:UITableView = {
+       let tableview = UITableView()
+        
+        tableview.register(UINib(nibName: "MovieCell", bundle: nil), forCellReuseIdentifier: "MovieCell")
+        tableview.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(tableview)
+        NSLayoutConstraint.activate([
+            tableview.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            tableview.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            tableview.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            tableview.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
+        ])
+        return tableview
+    }()
 
     // MARK: - Private properties -
+    private let disposeBag = DisposeBag()
     private var viewModel = MoviesListViewModel()
+    
+    // MARK: - Dim View
+    private let dimViewAlpha: CGFloat = 0.5
+    private lazy var dimView: UIView = {
+        let v = UIView(frame: .zero)
+        v.alpha = 0
+        v.backgroundColor = .black.withAlphaComponent(dimViewAlpha)
+        v.isUserInteractionEnabled = false
+        let activityIndicatorView = UIActivityIndicatorView()
+        activityIndicatorView.style = .large
+        activityIndicatorView.startAnimating()
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        v.addSubview(activityIndicatorView)
+        NSLayoutConstraint.activate([
+            activityIndicatorView.centerXAnchor.constraint(equalTo: v.centerXAnchor),
+            activityIndicatorView.centerYAnchor.constraint(equalTo: v.centerYAnchor)
+        ])
+        return v
+    }()
     
     // MARK: - Lifecycle -
     init() {
@@ -24,14 +60,88 @@ final class MoviesListVC: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupLayoutUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.fetchMoviesList()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        view.bringSubviewToFront( dimView)
+    }
+    
+    // MARK: - setupLayoutUI -
+    private func setupLayoutUI() {
+        addDimView()
+        bindLoadingView()
+        bindTableView()
+        title = "Movies List"
+        view.backgroundColor = .white
+    }
+    
+    func bindLoadingView()  {
+        viewModel.state.bind { state in
+            DispatchQueue.main.async {
+                switch state {
+                case .empty:
+                    //show empty text
+                    self.showingLoadingView(isLoading: false)
+                    self.tableView.setEmptyMessage("No Data Found".localized)
+                    break
+                case .loading:
+                    // show loading view
+                    self.tableView.hiddenEmptyMessage()
+                    self.showingLoadingView(isLoading: true)
+                    break
+                case .fetched:
+                    //loading tableView and hiddenEmptyMessag
+                    self.tableView.hiddenEmptyMessage()
+                    self.showingLoadingView(isLoading: false)
+                case .error(let error):
+                    // show error message
+                    self.showingLoadingView(isLoading: false)
+                    self.tableView.setEmptyMessage("No Data Found".localized)
+                    self.showAlert(title: "Error".localized, message: error)
+                }
+            }
+        }.disposed(by: disposeBag)
+    }
+    
+    func bindTableView(){
+        tableView.rx.setDelegate(self).disposed(by: disposeBag)
+        viewModel.movies.bind(to: tableView.rx.items(cellIdentifier: "MovieCell", cellType: MovieCell.self)){
+            [weak self](row, item, cell) in
+            guard let self = self else { return }
+            cell.config(movie: self.viewModel.createCellDispaly(photo: item))
+        }.disposed(by: disposeBag)
+    }
+    
+    
+    private func addDimView() {
+        dimView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(dimView)
+        NSLayoutConstraint.activate([
+            dimView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dimView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            dimView.topAnchor.constraint(equalTo: view.topAnchor),
+            dimView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+    
+    private func showingLoadingView(isLoading:Bool){
+        UIView.animate(withDuration: 0.5) {
+            self.dimView.alpha = isLoading ? 1:0
+        }
     }
 
 }
 
-// MARK: - Extensions -
-extension MoviesListVC {
+// MARK: - UITableViewDelegate Extension -
+extension MoviesListVC : UITableViewDelegate{
     
 }

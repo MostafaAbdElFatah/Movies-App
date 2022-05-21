@@ -43,7 +43,7 @@ struct MovieDisplay {
     let image:String
     
     init(movie:Photo){
-        name = movie.title
+        name = movie.title.ifBlank(use:"No title".localized)
         //http://farm​{farm}​.static.flickr.com/​{server}​/​{id}​_​{secret}​.jpg
         //https://farm66.static.flickr.com/65535/50397567507_855de8e6a9.jpg
         image = "https://farm\(movie.farm).static.flickr.com/\(movie.server)/\(movie.id)_\(movie.secret).jpg"
