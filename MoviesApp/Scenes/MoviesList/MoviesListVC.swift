@@ -109,8 +109,8 @@ final class MoviesListVC: UIViewController {
                     self.tableView.setEmptyMessage("No Data Found".localized)
                     self.showAlert(title: "Error".localized, message: error)
                 }
+                self.tableView.footRefreshControl.endRefreshing()
             }
-            self.tableView.footRefreshControl.endRefreshing()
         }.disposed(by: disposeBag)
     }
     
