@@ -22,9 +22,12 @@ final class MoviesListViewModel{
     private var totalPages:Int = 1
     private var currentPage:Int = 1
     private var disposeBag = DisposeBag()
+    private var dbManager:SQLManagerProtocol
     private var apisManager:MoviesAPIsManagerProtocol
     
-    init(apisManager:MoviesAPIsManagerProtocol = MoviesAPIsManager()) {
+    
+    init(apisManager:MoviesAPIsManagerProtocol = MoviesAPIsManager(), dbManager:SQLManagerProtocol = SQLManager()) {
+        self.dbManager = dbManager
         self.apisManager = apisManager
         selectedLink.bind{ [weak self] url in
             guard let self = self else { return }
@@ -35,6 +38,27 @@ final class MoviesListViewModel{
     
     // MARK: - fetchMovies -
     func fetchMoviesList() {
+        if Reachability.isConnectedToNetwork() {
+            fetchMoviesListFromAPIs()
+        }else{
+            fetchMoviesListFromDB()
+        }
+    }
+    
+    private func fetchMoviesListFromDB(){
+        self.state.onNext(.fetched)
+        totalPages += 1
+        currentPage += 1
+        
+        guard var moviesList = try? self.movies.value() else { return }
+        moviesList.append(contentsOf: dbManager.fetchMoviesList(currentOffset: currentPage))
+        moviesList = moviesList.filter({ $0 is Photo })
+        // inject ad banners between movies
+        let list = moviesList.injectAdBanners()
+        self.movies.onNext(list)
+    }
+    
+    private func fetchMoviesListFromAPIs(){
         if currentPage > totalPages {
             state.onNext(.fetched)
             return
@@ -59,10 +83,13 @@ final class MoviesListViewModel{
                 self.state.onNext(.fetched)
                 self.totalPages = response.photosList.pages
                 self.currentPage = response.photosList.page + 1
+                
                 guard var moviesList = try? self.movies.value() else { return }
                 moviesList.append(contentsOf: response.photosList.photos)
                 moviesList = moviesList.filter({ $0 is Photo })
                 
+                //save movies
+                self.saveNewMovies(photos: moviesList)
                 // inject ad banners between movies
                 let list = moviesList.injectAdBanners()
                 
@@ -72,6 +99,12 @@ final class MoviesListViewModel{
             }
             
         }
+    }
+    
+    // MARK: - save new Movies  -
+    private func saveNewMovies(photos:[Any]) {
+        guard let movies = photos as? [Photo] else { return }
+        dbManager.saveMovies(movies)
     }
     
     // MARK: - create movie cell display object -

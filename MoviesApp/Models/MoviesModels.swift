@@ -5,6 +5,7 @@
 //  Created by Mostafa Abd ElFatah on 5/21/22.
 //
 
+import GRDB
 import Foundation
 
 
@@ -37,6 +38,21 @@ struct Photo: Codable {
     let title: String
     let ispublic, isfriend, isfamily: Int
 }
+
+extension Photo: FetchableRecord {
+    init(row: Row) {
+        id = row["id"]
+        owner = row["owner"]
+        secret = row["secret"]
+        server = row["server"]
+        farm = row["farm"]
+        title = row["title"]
+        ispublic = row["ispublic"]
+        isfriend = row["isfriend"]
+        isfamily = row["isfamily"]
+    }
+}
+
 
 struct MovieDisplay {
     let name:String
