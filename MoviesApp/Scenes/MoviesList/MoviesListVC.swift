@@ -16,7 +16,7 @@ final class MoviesListVC: UIViewController {
     // MARK: - Public properties -
     lazy var tableView:UITableView = {
        let tableview = UITableView()
-        
+        tableview.register(UINib(nibName: "AdBannerCell", bundle: nil), forCellReuseIdentifier: "AdBannerCell")
         tableview.register(UINib(nibName: "MovieCell", bundle: nil), forCellReuseIdentifier: "MovieCell")
         tableview.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableview)
@@ -120,10 +120,18 @@ final class MoviesListVC: UIViewController {
             self.viewModel.fetchMoviesList()
         }, themeColor: .blue, refreshStyle: .replicatorAllen)
         tableView.rx.setDelegate(self).disposed(by: disposeBag)
-        viewModel.movies.bind(to: tableView.rx.items(cellIdentifier: "MovieCell", cellType: MovieCell.self)){
-            [weak self](row, item, cell) in
-            guard let self = self else { return }
-            cell.config(movie: self.viewModel.createCellDispaly(photo: item))
+        viewModel.movies.bind(to: tableView.rx.items){
+            [weak self](tbv, row, item) in
+            guard let self = self else { return UITableViewCell() }
+            if !self.viewModel.isBanner(row: row){
+                let cell = tbv.dequeueReusableCell(withIdentifier: "MovieCell", for: IndexPath(row: row, section: 0)) as! MovieCell
+                cell.config(movie: self.viewModel.createCellDispaly(photo: item as! Photo))
+                return cell
+            }else {
+                let cell = tbv.dequeueReusableCell(withIdentifier: "AdBannerCell", for: IndexPath(row: row, section: 0)) as! AdBannerCell
+                cell.config(imageNamed: item as! String)
+                return cell
+            }
         }.disposed(by: disposeBag)
     }
     

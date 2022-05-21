@@ -13,7 +13,7 @@ final class MoviesListViewModel{
     
     // MARK: - Public properties -
     var state = BehaviorSubject<State>(value: .empty)
-    public var movies = BehaviorSubject<[Photo]>(value: [])
+    public var movies = BehaviorSubject<[Any]>(value: [])
     
     
     // MARK: - Private properties -
@@ -53,8 +53,12 @@ final class MoviesListViewModel{
                 self.currentPage = response.photosList.page + 1
                 guard var moviesList = try? self.movies.value() else { return }
                 moviesList.append(contentsOf: response.photosList.photos)
+                moviesList = moviesList.filter({ $0 is Photo })
                 
-                self.movies.onNext(moviesList)
+                // inject ad banners between movies
+                let list = moviesList.injectAdBanners()
+                
+                self.movies.onNext(list)
             case .failure(let error):
                 self.state.onNext(.error(error.localizedDescription))
             }
@@ -67,4 +71,10 @@ final class MoviesListViewModel{
         MovieDisplay(movie: photo)
     }
 
+    // MARK: - isAdBanner cell at this row -
+    func isBanner(row:Int)-> Bool {
+        guard let moviesList = try? self.movies.value() else { return false }
+        return moviesList[row] is String
+    }
+    
 }
