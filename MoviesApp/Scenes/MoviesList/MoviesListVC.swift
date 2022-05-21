@@ -7,8 +7,9 @@
 //
 
 import UIKit
-import RxSwift
 import RxCocoa
+import RxSwift
+import KafkaRefresh
 
 final class MoviesListVC: UIViewController {
 
@@ -78,8 +79,8 @@ final class MoviesListVC: UIViewController {
     // MARK: - setupLayoutUI -
     private func setupLayoutUI() {
         addDimView()
-        bindLoadingView()
         bindTableView()
+        bindLoadingView()
         title = "Movies List"
         view.backgroundColor = .white
     }
@@ -109,10 +110,15 @@ final class MoviesListVC: UIViewController {
                     self.showAlert(title: "Error".localized, message: error)
                 }
             }
+            self.tableView.footRefreshControl.endRefreshing()
         }.disposed(by: disposeBag)
     }
     
     func bindTableView(){
+        tableView.bindFootRefreshHandler({ [weak self] in
+            guard let self = self else { return }
+            self.viewModel.fetchMoviesList()
+        }, themeColor: .blue, refreshStyle: .replicatorAllen)
         tableView.rx.setDelegate(self).disposed(by: disposeBag)
         viewModel.movies.bind(to: tableView.rx.items(cellIdentifier: "MovieCell", cellType: MovieCell.self)){
             [weak self](row, item, cell) in
@@ -144,4 +150,13 @@ final class MoviesListVC: UIViewController {
 // MARK: - UITableViewDelegate Extension -
 extension MoviesListVC : UITableViewDelegate{
     
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let currentOffset = scrollView.contentOffset.y
+        let maximumOffset = scrollView.contentSize.height - scrollView.frame.size.height
+        
+        // Change 10.0 to adjust the distance from bottom
+        if maximumOffset - currentOffset <= 10.0 {
+            tableView.footRefreshControl.beginRefreshing()
+        }
+    }
 }

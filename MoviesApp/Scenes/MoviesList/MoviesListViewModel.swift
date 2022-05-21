@@ -17,6 +17,7 @@ final class MoviesListViewModel{
     
     
     // MARK: - Private properties -
+    private var totalPages:Int = 1
     private var currentPage:Int = 1
     private var apisManager:MoviesAPIsManagerProtocol
     
@@ -26,6 +27,10 @@ final class MoviesListViewModel{
     
     // MARK: - fetchMovies -
     func fetchMoviesList() {
+        if currentPage > totalPages {
+            state.onNext(.fetched)
+            return
+        }
         
         let urlString = URLs.moviesListURL(page: currentPage)
         guard let url = URL(string: urlString) else {
@@ -33,7 +38,10 @@ final class MoviesListViewModel{
             return
         }
         
-        state.onNext(.loading)
+        if let currentState = try? state.value(), case .empty = currentState {
+            state.onNext(.loading)
+        }
+        
         apisManager.fetchMovies(from: url) { [weak self] result in
             guard let self = self else { return }
             self.state.onNext(.fetched)
@@ -41,7 +49,12 @@ final class MoviesListViewModel{
             switch result {
             case .success(let response):
                 self.state.onNext(.fetched)
-                self.movies.onNext(response.photosList.photos)
+                self.totalPages = response.photosList.pages
+                self.currentPage = response.photosList.page + 1
+                guard var moviesList = try? self.movies.value() else { return }
+                moviesList.append(contentsOf: response.photosList.photos)
+                
+                self.movies.onNext(moviesList)
             case .failure(let error):
                 self.state.onNext(.error(error.localizedDescription))
             }
