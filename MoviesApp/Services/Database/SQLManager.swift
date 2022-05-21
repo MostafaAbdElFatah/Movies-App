@@ -20,22 +20,6 @@ fileprivate let appDataDBQueue:DatabaseQueue = {
     return try! DatabaseQueue(path: dbPath)
 }()
 
-protocol SQLManagerProtocol {
-    
-    func delete(id:Int)
-    func deleteMovies()
-    func saveMovie(_ photo:Photo)
-    func saveMovies(_ movies:[Photo])
-    func fetchMoviesList(currentOffset:Int, pageSize:Int) -> [Photo]
-    
-}
-
-extension SQLManagerProtocol{
-    func fetchMoviesList(currentOffset:Int, pageSize:Int = 20) -> [Photo]{
-        fetchMoviesList(currentOffset: currentOffset, pageSize: pageSize)
-    }
-}
-
 class SQLManager {
     
     
@@ -66,7 +50,7 @@ class SQLManager {
     
 }
 
-extension SQLManager: SQLManagerProtocol{
+extension SQLManager: DBManagerProtocol{
     
     // MARK: - fetchMoviesList -
     func fetchMoviesList(currentOffset:Int, pageSize:Int = 20) -> [Photo]{
@@ -119,7 +103,7 @@ extension SQLManager: SQLManagerProtocol{
     }
     
     // MARK: - delete with id -
-    func delete(id:Int) {
+    func delete(id:String) {
         do {
             try appDataDBQueue.write({ db in
                 try db.execute(

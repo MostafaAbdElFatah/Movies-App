@@ -14,7 +14,7 @@ class MoviesAPIsManagerProtocolMock: MoviesAPIsManagerProtocol {
     var fetchMoviesIsCalled = false
     
     var response:MoviesReponse!
-    var handler:((Result<MoviesReponse, NetworkAPIError>) -> Void)!
+    var handler:((Result<MoviesReponse, NetworkAPIError>) -> Void)?
     
     func fetchMovies(from url: URL, handler: @escaping (Result<MoviesReponse, NetworkAPIError>) -> Void) {
         fetchMoviesIsCalled = true
@@ -22,11 +22,11 @@ class MoviesAPIsManagerProtocolMock: MoviesAPIsManagerProtocol {
     }
     
     func fetchSuccess() {
-        handler(.success(response))
+        handler?(.success(response))
     }
     
     func fetchFailure(error:NetworkAPIError) {
-        handler(.failure(error))
+        handler?(.failure(error))
     }
     
 }

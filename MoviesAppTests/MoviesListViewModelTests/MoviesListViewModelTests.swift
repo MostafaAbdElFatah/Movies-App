@@ -11,13 +11,17 @@ import XCTest
 class MoviesListViewModelTests: XCTestCase {
 
     var sut:MoviesListViewModel!
+    var dbManager:DBManagerProtocolMock!
+    var reachability:ReachabilityProtocolMock!
     var apisManagerMock:MoviesAPIsManagerProtocolMock!
     
     
     override func setUp() {
         super.setUp()
+        dbManager = DBManagerProtocolMock()
+        reachability = ReachabilityProtocolMock()
         apisManagerMock = MoviesAPIsManagerProtocolMock()
-        sut = MoviesListViewModel(apisManager: apisManagerMock)
+        sut = MoviesListViewModel(apisManager: apisManagerMock, dbManager: dbManager, reachability: reachability)
     }
 
     override func tearDown() {
@@ -25,20 +29,26 @@ class MoviesListViewModelTests: XCTestCase {
         apisManagerMock = nil
         super.tearDown()
     }
+
     
-    
-    // MARK: - testFetchMoviesList -
-    func testFetchMoviesList(){
+    // MARK: - Network tests -
+    // MARK: - testFetchMoviesListFromAPIs -
+    func testFetchMoviesListFromAPIs(){
+        //Given:
+        reachability.isConnectToNetwork = true
         // When:
         sut.fetchMoviesList()
+        let isConnect = reachability.isConnectedToNetwork()
         // Then:
+        XCTAssertTrue(isConnect)
         XCTAssert(apisManagerMock.fetchMoviesIsCalled)
     }
     
     // MARK: - testFetchSuceess -
-    func testFetchLoading() {
+    func testFetchLoadingFromAPIs() {
         //Given:
         var state:State = .empty
+        reachability.isConnectToNetwork = true
         
         //When:
         sut.fetchMoviesList()
@@ -49,7 +59,7 @@ class MoviesListViewModelTests: XCTestCase {
     }
     
     // MARK: - testFetchSuceess -
-    func testFetchSuceess() {
+    func testFetchSuceessFromAPIs() {
         
         //Given:
         guard let response = MoviesGenerator().moviesPhotos() else {
@@ -60,6 +70,7 @@ class MoviesListViewModelTests: XCTestCase {
         
         var state:State = .empty
         apisManagerMock.response = response
+        reachability.isConnectToNetwork = true
         
         //When:
         sut.fetchMoviesList()
@@ -71,9 +82,10 @@ class MoviesListViewModelTests: XCTestCase {
     }
     
     // MARK: - testFetchFailure -
-    func testFetchFailure() {
+    func testFetchFailureFromAPIs() {
         
         //Given:
+        reachability.isConnectToNetwork = true
         let networkAPIError:NetworkAPIError = .invalidData
         
         //When:
@@ -90,6 +102,56 @@ class MoviesListViewModelTests: XCTestCase {
         }
     }
     
+    
+    // MARK: - DB tests -
+    // MARK: - testFetchMoviesListFromDB -
+    func testFetchMoviesListFromDB(){
+        //Given:
+        reachability.isConnectToNetwork = false
+        // When:
+        sut.fetchMoviesList()
+        let isConnect = reachability.isConnectedToNetwork()
+        // Then:
+        XCTAssertFalse(isConnect)
+        XCTAssert(dbManager.fetchMoviesIsCalled)
+    }
+    
+    
+    // MARK: - testFetchSuceess -
+    func testFetchSuceessFromDB() {
+        
+        //Given:
+        guard let response = MoviesGenerator().moviesPhotos() else {
+            XCTFail("Failed to generate photos")
+            return
+        }
+        
+        reachability.isConnectToNetwork = false
+        dbManager.photoList = response.photosList.photos
+        
+        //When:
+        sut.fetchMoviesList()
+        let photoList = dbManager.fetchMoviesList(currentOffset: 1)
+        
+        //Then
+        XCTAssertFalse(photoList.isEmpty)
+    }
+    
+    
+    // MARK: - testFetchFailure -
+    func testFetchFailureFromDB() {
+        
+        //Given:
+        reachability.isConnectToNetwork = false
+        //When:
+        sut.fetchMoviesList()
+        let photoList = dbManager.fetchMoviesList(currentOffset: 1)
+        
+        //Then:
+        XCTAssertTrue(photoList.isEmpty)
+    }
+    
+    // MARK: - Other tests -
     // MARK: - testCreateCellDispaly -
     func testCreateCellDispaly(){
         // Given:
@@ -114,7 +176,8 @@ class MoviesListViewModelTests: XCTestCase {
         
         let indexPath = IndexPath(row: 3, section: 0)
         apisManagerMock.response = response
-
+        dbManager.photoList = response.photosList.photos
+        
         sut.fetchMoviesList()
         apisManagerMock.fetchSuccess()
         
@@ -140,6 +203,7 @@ class MoviesListViewModelTests: XCTestCase {
         //adBanner in five row
         let indexPath = IndexPath(row: 4, section: 0)
         apisManagerMock.response = response
+        dbManager.photoList = response.photosList.photos
 
         sut.fetchMoviesList()
         apisManagerMock.fetchSuccess()
@@ -153,6 +217,7 @@ class MoviesListViewModelTests: XCTestCase {
         XCTAssertNil(selectedPhoto)
         XCTAssertNotNil(selectedAdBannerLink)
     }
+    
     
     
 }

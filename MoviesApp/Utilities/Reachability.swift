@@ -7,8 +7,13 @@
 import Foundation
 import SystemConfiguration
 
-public class Reachability {
-    public static func isConnectedToNetwork() -> Bool {
+protocol ReachabilityProtocol {
+    func isConnectedToNetwork() -> Bool
+}
+
+class Reachability: ReachabilityProtocol {
+    
+    func isConnectedToNetwork() -> Bool {
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
         zeroAddress.sin_family = sa_family_t(AF_INET)

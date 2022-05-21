@@ -12,23 +12,29 @@ import Foundation
 final class MoviesListViewModel{
     
     // MARK: - Public properties -
-    public var selectedLink = PublishSubject<String?>()
-    public var selectedPhoto = PublishSubject<Photo?>()
     public var movies = BehaviorSubject<[Any]>(value: [])
     public var state = BehaviorSubject<State>(value: .empty)
+    public var selectedLink = BehaviorSubject<String?>(value: nil)
+    public var selectedPhoto = BehaviorSubject<Photo?>(value: nil)
     
     
     // MARK: - Private properties -
     private var totalPages:Int = 1
     private var currentPage:Int = 1
     private var disposeBag = DisposeBag()
-    private var dbManager:SQLManagerProtocol
+    private var dbManager:DBManagerProtocol
+    private var reachability:ReachabilityProtocol
     private var apisManager:MoviesAPIsManagerProtocol
     
     
-    init(apisManager:MoviesAPIsManagerProtocol = MoviesAPIsManager(), dbManager:SQLManagerProtocol = SQLManager()) {
+    init(apisManager:MoviesAPIsManagerProtocol = MoviesAPIsManager(),
+         dbManager:DBManagerProtocol = SQLManager(),
+         reachability:ReachabilityProtocol = Reachability()) {
+        
         self.dbManager = dbManager
         self.apisManager = apisManager
+        self.reachability = reachability
+        
         selectedLink.bind{ [weak self] url in
             guard let self = self else { return }
             guard let url = url else { return }
@@ -38,7 +44,7 @@ final class MoviesListViewModel{
     
     // MARK: - fetchMovies -
     func fetchMoviesList() {
-        if Reachability.isConnectedToNetwork() {
+        if reachability.isConnectedToNetwork() {
             fetchMoviesListFromAPIs()
         }else{
             fetchMoviesListFromDB()
