@@ -12,17 +12,25 @@ import Foundation
 final class MoviesListViewModel{
     
     // MARK: - Public properties -
-    var state = BehaviorSubject<State>(value: .empty)
+    public var selectedLink = PublishSubject<String?>()
+    public var selectedPhoto = PublishSubject<Photo?>()
     public var movies = BehaviorSubject<[Any]>(value: [])
+    public var state = BehaviorSubject<State>(value: .empty)
     
     
     // MARK: - Private properties -
     private var totalPages:Int = 1
     private var currentPage:Int = 1
+    private var disposeBag = DisposeBag()
     private var apisManager:MoviesAPIsManagerProtocol
     
     init(apisManager:MoviesAPIsManagerProtocol = MoviesAPIsManager()) {
         self.apisManager = apisManager
+        selectedLink.bind{ [weak self] url in
+            guard let self = self else { return }
+            guard let url = url else { return }
+            self.openLink(url)
+        }.disposed(by: disposeBag)
     }
     
     // MARK: - fetchMovies -
@@ -78,13 +86,20 @@ final class MoviesListViewModel{
     }
     
     // MARK: - get photo object at this row -
-    func getObject(at row:Int) -> Photo?{
+    private func getPhoto(at row:Int) -> Photo?{
         guard let moviesList = try? self.movies.value() else { return nil }
         return moviesList[row] as? Photo
     }
     
-    func openAdBanner() {
-        openLink("https://www.getkoinz.com/")
+    // MARK: - cellSelected -
+    func cellSelected(indexPath:IndexPath){
+        if isBanner(row: indexPath.row) {
+            //open adBanner link
+            selectedLink.onNext("https://www.getkoinz.com/")
+        }else{
+            // move to movie details with selected photo
+            selectedPhoto.onNext(getPhoto(at: indexPath.row))
+        }
     }
     
     private func openLink(_ link:String){

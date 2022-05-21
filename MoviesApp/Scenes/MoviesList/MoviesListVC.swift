@@ -80,13 +80,22 @@ final class MoviesListVC: UIViewController {
     private func setupLayoutUI() {
         addDimView()
         bindTableView()
+        bindNavigation()
         bindLoadingView()
         title = "Movies List"
         view.backgroundColor = .white
     }
     
+    func bindNavigation() {
+        viewModel.selectedPhoto.bind{ [weak self]  photo in
+            guard let self = self else { return }
+            self.moveTo(photo: photo)
+        }.disposed(by: disposeBag)
+    }
+    
     func bindLoadingView()  {
-        viewModel.state.bind { state in
+        viewModel.state.bind { [weak self] state in
+            guard let self = self else { return }
             DispatchQueue.main.async {
                 switch state {
                 case .empty:
@@ -122,13 +131,7 @@ final class MoviesListVC: UIViewController {
         tableView.rx.setDelegate(self).disposed(by: disposeBag)
         tableView.rx.itemSelected.subscribe(onNext:{ [weak self] indexPath in
             guard let self = self else { return }
-            if self.viewModel.isBanner(row: indexPath.row) {
-                //open adBanner link
-                self.viewModel.openAdBanner()
-            }else{
-                // move to movie details
-                self.moveTo(photo: self.viewModel.getObject(at: indexPath.row))
-            }
+            self.viewModel.cellSelected(indexPath: indexPath)
         }).disposed(by: disposeBag)
         viewModel.movies.bind(to: tableView.rx.items){
             [weak self](tbv, row, item) in

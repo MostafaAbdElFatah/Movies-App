@@ -8,7 +8,7 @@
 import Foundation
 
 
-enum State {
+enum State: Equatable {
     case empty
     case loading
     case fetched
