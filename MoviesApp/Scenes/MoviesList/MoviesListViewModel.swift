@@ -77,4 +77,19 @@ final class MoviesListViewModel{
         return moviesList[row] is String
     }
     
+    // MARK: - get photo object at this row -
+    func getObject(at row:Int) -> Photo?{
+        guard let moviesList = try? self.movies.value() else { return nil }
+        return moviesList[row] as? Photo
+    }
+    
+    func openAdBanner() {
+        openLink("https://www.getkoinz.com/")
+    }
+    
+    private func openLink(_ link:String){
+        let application = UIApplication.shared
+        guard let url = URL(string: link) else { return }
+        application.open( url, options: [:])
+    }
 }

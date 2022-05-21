@@ -120,6 +120,16 @@ final class MoviesListVC: UIViewController {
             self.viewModel.fetchMoviesList()
         }, themeColor: .blue, refreshStyle: .replicatorAllen)
         tableView.rx.setDelegate(self).disposed(by: disposeBag)
+        tableView.rx.itemSelected.subscribe(onNext:{ [weak self] indexPath in
+            guard let self = self else { return }
+            if self.viewModel.isBanner(row: indexPath.row) {
+                //open adBanner link
+                self.viewModel.openAdBanner()
+            }else{
+                // move to movie details
+                self.moveTo(photo: self.viewModel.getObject(at: indexPath.row))
+            }
+        }).disposed(by: disposeBag)
         viewModel.movies.bind(to: tableView.rx.items){
             [weak self](tbv, row, item) in
             guard let self = self else { return UITableViewCell() }
@@ -135,6 +145,12 @@ final class MoviesListVC: UIViewController {
         }.disposed(by: disposeBag)
     }
     
+    
+    private func moveTo(photo:Photo?) {
+        let vc = MovieDetailsVC()
+        vc.viewModel.movie.onNext(photo)
+        navigationController?.pushViewController(vc, animated: true)
+    }
     
     private func addDimView() {
         dimView.translatesAutoresizingMaskIntoConstraints = false
